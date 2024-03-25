@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -23,12 +24,102 @@ namespace Readers_and_Writers_Problem
         static Semaphore readLock = new Semaphore(1, 1); // Semaphore cho việc đọc, ban đầu là 1
         static Semaphore writeLock = new Semaphore(1, 1); // Semaphore cho việc ghi, ban đầu là 1
         static int readCount = 0; // Số lượng người đọc
+        static int completedCount = 0; // Số lượng người đã hoàn thành
 
         static ManualResetEvent startEvent = new ManualResetEvent(false); // Sự kiện bắt đầu
 
         static Random random = new Random();
 
+        static List<string> progress = new List<string>();
+
+        static List<String> log = new List<String>();
+        
         static void Main(string[] args)
+        {
+            string userInput;
+            do
+            {
+                userInput = Console.ReadLine(); // Nhập dữ liệu một lần và lưu vào biến userInput
+
+                if (userInput == "show")
+                {
+                    if (progress.Count != 0)
+                    {
+                        Console.WriteLine("Progress: ");
+                        foreach (string item in progress)
+                        {
+                            Console.Write(item);
+                            if (item == progress.Last())
+                            {
+                                Console.Write(".");
+                                Console.WriteLine();
+                            }
+                            else
+                            {
+                                Console.Write(", ");
+                            }
+                        }
+                        Console.WriteLine();
+                    }
+                    else
+                    {
+                        Console.WriteLine("No progress.");
+                        Console.WriteLine();
+                    }
+                }
+                else if (userInput == "log")
+                {
+                    if (log.Count != 0)
+                    {
+                        Console.WriteLine("Log: ");
+                        foreach (string item in log)
+                        {
+                            Console.WriteLine(item);
+                        }
+                        Console.WriteLine();
+                    }
+                    else
+                    {
+                        Console.WriteLine("No log.");
+                        Console.WriteLine();
+                    }
+                }
+                else if (userInput == "restart")
+                {
+                    Console.Clear();
+                    progress.Clear();
+                    log.Clear();
+                    completedCount = 0;
+                    readCount = 0;
+
+                    problem();
+
+                }
+                else if (userInput == "start")
+                {
+                    problem();
+                }
+                else if (userInput == "help")
+                {
+                    Console.WriteLine("Please input is following character:");
+                    Console.WriteLine("show: Show the progress of the program.");
+                    Console.WriteLine("log: Show the log of the program.");
+                    Console.WriteLine("exit: Exit the program.");
+                    Console.WriteLine("restart: Restart the program.");
+                    Console.WriteLine();
+                }
+                else if (userInput == "exit")
+                {
+                    Environment.Exit(0);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid command. Please try again.");
+                }
+            } while (true); // Lặp lại vòng lặp cho đến khi người dùng nhập "exit"
+        }
+
+        static private void problem()
         {
             int n; // Số lượng người đọc
             int m; // Số lượng người ghi
@@ -38,6 +129,7 @@ namespace Readers_and_Writers_Problem
             Console.Write("Enter the number of writers: ");
             m = Convert.ToInt32(Console.ReadLine());
 
+            Console.WriteLine();
             // Khởi tạo và khởi động các luồng cho người đọc
             for (int i = 0; i < n; i++)
             {
@@ -54,8 +146,15 @@ namespace Readers_and_Writers_Problem
 
             startEvent.Set();
 
-            Console.ReadLine();
+            while (completedCount < n + m)
+            {
+                Thread.Sleep(100); // Chờ một khoảng thời gian để giảm tải CPU
+            }
+
+            Console.WriteLine("Completed.");
+            Console.WriteLine();
         }
+
         static void ReaderWriter(object parameter)
         {
             startEvent.WaitOne(); // Đợi cho đến khi sự kiện bắt đầu được kích hoạt
@@ -69,6 +168,8 @@ namespace Readers_and_Writers_Problem
             {
                 Writer(info.index); // Gọi phương thức Writer với index của luồng
             }
+
+            Interlocked.Increment(ref completedCount); // Tăng số lượng người đã hoàn thành
         }
 
         static void Writer(int index)
@@ -78,14 +179,20 @@ namespace Readers_and_Writers_Problem
 
             writeLock.WaitOne(); // Đợi cho đến khi có thể ghi
             Console.WriteLine("Writer "+ index +" start writing ...");
-            for (int i = 0; i < 5; i++)
+            Console.WriteLine();
+            log.Add("Writer " + index + " start writing ...");
+            progress.Add("Writer " + index.ToString());
+
+            for (int i = 0; i < 3; i++)
             {
                 Console.WriteLine("Writer " + index + " is writing ...");
+                log.Add("Writer " + index + " is writing ...");
                 Thread.Sleep(1000);
-                if (i == 4)
+                if (i == 2)
                 {
                     Console.WriteLine("Writer " + index + " has finished writing.");
                     Console.WriteLine();
+                    log.Add("Writer " + index + " has finished writing.");
                 }
             }
             writeLock.Release(); // Thông báo đã ghi xong
@@ -106,17 +213,21 @@ namespace Readers_and_Writers_Problem
 
             Console.WriteLine("Reader " + index + " start reading..."); // Sử dụng giá trị index thay cho i
             Console.WriteLine();
-            for (int i = 0; i < 3; i++)
+            log.Add("Reader " + index + " start reading...");
+            progress.Add("Reader " + index.ToString());
+            
+            for (int i = 0; i < 1; i++)
             {
                 Console.WriteLine("Reader "+ index+ " is reading...");
+                log.Add("Reader " + index + " is reading...");
                 Thread.Sleep(1000);
-                if (i == 2)
+                if (i == 0)
                 {
                     Console.WriteLine("Reader " + index + " has finished reading.");
                     Console.WriteLine();
+                    log.Add("Reader " + index + " has finished reading.");
                 }
             }
-            
 
             readLock.WaitOne(); // Đợi cho đến khi có thể đọc
             readCount--; // Giảm số lượng người đọc

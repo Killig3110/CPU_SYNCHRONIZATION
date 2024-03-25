@@ -35,14 +35,14 @@ namespace Dining_Philosophers_Problem
         {
             int philosopherIndex = (int)index;
             int leftChopstick = philosopherIndex;
-            int rightChopstick = (philosopherIndex + 1) % 5;
+            int rightChopstick = (philosopherIndex + 1) % 5; // Lấy phần dư để xác định đũa bên phải
 
             while (true)
             {
                 // Thinking
                 Console.WriteLine("Philosopher " + philosopherIndex + " is thinking.");
                 Console.WriteLine();
-                Thread.Sleep(random.Next(1000, 5000)); // Ngẫu nhiên thời gian suy nghĩ
+                Thread.Sleep(random.Next(3000, 5000)); // Ngẫu nhiên thời gian suy nghĩ
 
                 // Attempt to pick up chopsticks
                 Console.WriteLine("Philosopher " + philosopherIndex + " is hungry and attempting to pick up chopsticks.");
@@ -57,7 +57,7 @@ namespace Dining_Philosophers_Problem
                         // Eating
                         Console.WriteLine("Philosopher " + philosopherIndex + " is eating.");
                         Console.WriteLine();
-                        Thread.Sleep(random.Next(1000, 5000)); // Ngẫu nhiên thời gian ăn
+                        Thread.Sleep(random.Next(3000, 5000)); // Ngẫu nhiên thời gian ăn
                         Console.WriteLine("Philosopher " + philosopherIndex + " finished eating.");
                         Console.WriteLine();
 
