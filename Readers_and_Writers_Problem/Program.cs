@@ -37,9 +37,18 @@ namespace Readers_and_Writers_Problem
         static void Main(string[] args)
         {
             string userInput;
+            Console.WriteLine("Please input is following character:");
+            Console.WriteLine("show: Show the progress of the program.");
+            Console.WriteLine("log: Show the log of the program.");
+            Console.WriteLine("exit: Exit the program.");
+            Console.WriteLine("restart: Restart the program.");
+            Console.WriteLine("start: Start the program.");
+            Console.WriteLine("clear: Clear console.");
+            Console.WriteLine();
             do
             {
                 userInput = Console.ReadLine(); // Nhập dữ liệu một lần và lưu vào biến userInput
+                userInput = userInput.ToLower(); // Chuyển đổi userInput thành chữ thường
 
                 if (userInput == "show")
                 {
@@ -106,11 +115,17 @@ namespace Readers_and_Writers_Problem
                     Console.WriteLine("log: Show the log of the program.");
                     Console.WriteLine("exit: Exit the program.");
                     Console.WriteLine("restart: Restart the program.");
+                    Console.WriteLine("start: Start the program.");
+                    Console.WriteLine("clear: Clear console.");
                     Console.WriteLine();
                 }
                 else if (userInput == "exit")
                 {
                     Environment.Exit(0);
+                }
+                else if (userInput == "clear")
+                {
+                    Console.Clear();
                 }
                 else
                 {
